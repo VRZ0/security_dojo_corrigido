@@ -1,16 +1,23 @@
 const router = require('express').Router();
-const { errHandling } = require('../../utils/utils');
+const { errHandling, decode64 } = require('../../utils/utils');
 const cookieParser = require('cookie-parser');
 const { getUserById, updateUsername } = require('../../service/service');
+
+const csrf = require('csurf')
+var bodyParser = require('body-parser')
+
+var csrfProtection = csrf({cookie: true})
+var parseForm = bodyParser.urlencoded({ extended: false })
 
 router.use(cookieParser());
 
 const renderData = {};
 
 router.get(
-	'/csrf-post',
+	'/csrf-post', parseForm, csrfProtection,
 	errHandling(async (req, res) => {
-		const { user_id } = req.cookies;
+		const cookieString = req.cookies;
+		const user_id  = decode64(cookieString.user_id);
 		const usuarioNaoAutenticado = user_id == undefined;
 
 		if (usuarioNaoAutenticado) {
@@ -18,18 +25,20 @@ router.get(
 		} else {
 			const { rows } = await getUserById(user_id);
 			renderData.username = rows[0].username;
+			renderData.csrfToken = req.csrfToken();
 			res.render('csrf-post', renderData);
 		}
 	})
 );
 
 router.post(
-	'/csrf-post/alterarusername',
+	'/csrf-post/alterarusername', parseForm, csrfProtection,
 	errHandling(async (req, res) => {
 		//CRIA A VARIAVEI COM BASE NO QUE VEIO NA URL
 		const { novo_username } = req.body;
 		//CRIA A VARIAVEI COM BASE NO QUE ESTA NOS COOKIES
-		const { user_id } = req.cookies;
+		const cookieString = req.cookies;
+		const user_id  = decode64(cookieString.user_id);
 		//BUSCA NO BANCO DE DADOS SE O USUARIO EXISTE
 		const { rows } = await getUserById(user_id);
 		const userExiste = rows.length == 1;

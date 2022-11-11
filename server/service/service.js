@@ -1,3 +1,5 @@
+const sanitize = require('sanitize-html')
+
 const {
 	getUserByName,
 	getUserById,
@@ -6,11 +8,13 @@ const {
 } = require('../data/data');
 
 exports.getUserByName = async nome => {
-	return await getUserByName(nome);
+	var sanitizedName = (sanitize(nome, {allowedTags:[]}))
+	return await getUserByName(sanitizedName);
 };
 
 exports.updateUsername = async (novo_username, user_id) => {
-	return await updateUsername(novo_username, user_id);
+	var sanitizedUsername = (sanitize(novo_username, {allowedTags:[]}))
+	return await updateUsername(sanitizedUsername, user_id);
 };
 
 exports.getUserById = async user_id => {

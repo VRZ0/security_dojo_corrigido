@@ -1,8 +1,14 @@
 const router = require('express').Router();
 const { errHandling } = require('../../utils/utils');
+const { encode64, decode64 } = require('../../utils/utils'); //modificado
 const cookieParser = require('cookie-parser');
 const { getUserById } = require('../../service/service');
+const helmet = require('helmet');
+
 router.use(cookieParser());
+
+router.use(helmet.frameguard({ action: "deny" }));
+
 
 const renderData = {};
 const vulnType = [
@@ -34,7 +40,7 @@ router.get(
 );
 
 // const cookies = { sameSite: 'none', secure: false, httpOnly: false };
-const cookies = { sameSite: 'none', secure: true, httpOnly: false };
+const cookies = { sameSite: 'lax', secure: true, httpOnly: true };
 // const cookies = { sameSite: 'strict', secure: false, httpOnly: false };
 // const cookies = { sameSite: 'strict', secure: true, httpOnly: true };
 // const cookies = { sameSite: 'lax', secure: false, httpOnly: false };
@@ -42,13 +48,13 @@ const cookies = { sameSite: 'none', secure: true, httpOnly: false };
 //REALIZA O LOGIN - SET COOKIES
 router.get(
 	'/login',
-	errHandling(async (req, res) => {
-		const user_id = 1;
-		const { rows } = await getUserById(user_id);
+	errHandling(async (req, res) => {		
+		const user_id = encode64('1'); //modificado
+		const { rows } = await getUserById(decode64(user_id)); //modificado
 		renderData.username = rows[0].username;
 		renderData.vulnType = vulnType;
 		renderData.hasUsers = 'true';
-		res.cookie('user_id', user_id, cookies).render(
+		res.cookie('user_id', user_id, cookies).render( //usado
 			'initial_page',
 			renderData
 		);

@@ -41,7 +41,7 @@ app.set('view engine', 'ejs');
 //Error Handler
 app.use((req, res, next) => {
 	const renderData = [];
-	renderData.error = '';
+	renderData.error = ''; //error
 	res.status(404).render('error_page', renderData);
 });
 //Error Handler
@@ -49,7 +49,7 @@ app.use((err, req, res, next) => {
 	console.log('\nSOMETHING WENT WRONG\n');
 	console.log(err);
 	const renderData = [];
-	renderData.error = err;
+	renderData.error = 'error'; //modificado
 	res.status(404).render('error_page', renderData);
 });
 

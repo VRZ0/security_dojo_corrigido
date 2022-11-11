@@ -2,13 +2,14 @@ const router = require('express').Router();
 const { errHandling } = require('../../utils/utils');
 const cookieParser = require('cookie-parser');
 const { getUserByName } = require('../../service/service');
+const { check } = require('express-validator')
 
 router.use(cookieParser());
 
 const renderData = {};
 
 router.get(
-	'/xss_refletido',
+	'/xss_refletido', [check('nome').escape()],
 	errHandling(async (req, res) => {
 		const { nome } = req.query;
 		renderData.hasUsers = 'false';
